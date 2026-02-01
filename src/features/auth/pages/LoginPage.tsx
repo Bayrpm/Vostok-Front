@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../hooks/useAuth';
 import { Button, Input, Card } from '../../../components';
 
 const LoginPage = () => {
@@ -19,9 +19,9 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(email);
       navigate('/dashboard');
-    } catch (err) {
+    } catch {
       setError('Error al iniciar sesión. Verifica tus credenciales.');
     } finally {
       setLoading(false);
