@@ -1,22 +1,27 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
+import { componentTagger } from "lovable-tagger";
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@features': path.resolve(__dirname, './src/features'),
-      '@layouts': path.resolve(__dirname, './src/layouts'),
-      '@services': path.resolve(__dirname, './src/services'),
-      '@models': path.resolve(__dirname, './src/models'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@utils': path.resolve(__dirname, './src/utils'),
-      '@context': path.resolve(__dirname, './src/context'),
-      '@router': path.resolve(__dirname, './src/router'),
+export default defineConfig(({ mode }) => ({
+  server: {
+    host: "::",
+    port: 8081,
+    hmr: {
+      overlay: false,
+    },
+    proxy: {
+      '/api': {
+        target: 'https://localhost:7180',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
-})
+  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+}));

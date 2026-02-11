@@ -1,3 +1,123 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Vostok Inventory System - Custom Palette */
+    /* Clean Lab Background: #F9FAFB */
+    --background: 210 20% 98%;
+    /* Deep Space Foreground: #0F172A */
+    --foreground: 222 47% 11%;
+
+    /* Card backgrounds */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Deep Space Primary: #0F172A */
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 20% 98%;
+
+    /* Steel Secondary: #E2E8F0 */
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Industrial Safety Accent: #F97316 */
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Rose Destructive: #F43F5E */
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Steel Border: #E2E8F0 */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 25 95% 53%;
+
+    --radius: 0.5rem;
+
+    /* Inventory Status Colors */
+    /* Healthy Stock: #10B981 (Emerald 500) */
+    --stock-healthy: 160 84% 39%;
+    /* Minimum Stock Alert: #FBBF24 (Amber 400) */
+    --stock-warning: 43 96% 56%;
+    /* Out of Stock: #F43F5E (Rose 500) */
+    --stock-danger: 350 89% 60%;
+
+    /* Sidebar - Deep Space Theme */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 15%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 222 47% 20%;
+    --sidebar-ring: 25 95% 53%;
+  }
+
+  .dark {
+    /* Dark mode - Deep Space base */
+    --background: 222 47% 7%;
+    --foreground: 210 20% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 47% 20%;
+    --secondary-foreground: 210 20% 98%;
+
+    --muted: 222 47% 20%;
+    --muted-foreground: 215 16% 65%;
+
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 350 89% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 47% 20%;
+    --input: 222 47% 20%;
+    --ring: 25 95% 53%;
+
+    /* Inventory Status Colors - Dark Mode */
+    --stock-healthy: 160 84% 39%;
+    --stock-warning: 43 96% 56%;
+    --stock-danger: 350 89% 60%;
+
+    --sidebar-background: 222 47% 5%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 12%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 222 47% 15%;
+    --sidebar-ring: 25 95% 53%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

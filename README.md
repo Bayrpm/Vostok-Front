@@ -1,174 +1,73 @@
-# Vostok-Front
-Sistema de inventarios - FrontEnd
+# Welcome to your Lovable project
 
-## 📋 Descripción
+## Project info
 
-Aplicación web moderna para gestión de inventarios construida con React, TypeScript, Vite y Tailwind CSS, siguiendo una arquitectura Feature-First que separa el dominio de negocio de la interfaz de usuario.
+**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
-## 🏗️ Arquitectura Feature-First
+## How can I edit this code?
 
-El proyecto está organizado siguiendo el patrón Feature-First, donde cada funcionalidad es autocontenida con sus propios componentes, páginas y lógica de negocio.
+There are several ways of editing your application.
 
-```
-src/
-├── features/           # Funcionalidades por dominio
-│   ├── auth/          # Autenticación
-│   │   ├── pages/     # Páginas de login, registro, etc.
-│   │   └── components/ # Componentes específicos de auth
-│   ├── inventory/     # Gestión de inventario
-│   │   ├── pages/     # Páginas de inventario
-│   │   └── components/ # Componentes de productos
-│   └── movements/     # Movimientos de inventario
-│       ├── pages/     # Páginas de movimientos
-│       └── components/ # Componentes de movimientos
-├── components/        # Componentes UI compartidos
-│   ├── Button.tsx
-│   ├── Input.tsx
-│   ├── Card.tsx
-│   └── index.ts
-├── layouts/           # Layouts de la aplicación
-│   ├── Auth/          # Layout para autenticación
-│   └── Dashboard/     # Layout para dashboard
-├── services/          # Servicios y APIs
-│   └── api.ts         # Cliente base Axios configurado
-├── models/            # Tipos e interfaces TypeScript
-│   └── index.ts       # Product, Movement, etc.
-├── hooks/             # Custom hooks
-│   └── useFetch.ts    # Hook genérico para fetch
-├── utils/             # Utilidades y helpers
-│   └── index.ts       # Funciones de formato, debounce, etc.
-├── context/           # Context API de React
-│   └── AuthContext.tsx # Contexto de autenticación
-├── router/            # Configuración de rutas
-│   └── index.tsx      # React Router setup
-└── main.tsx           # Entry point
-```
+**Use Lovable**
 
-## 🚀 Comandos
+Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
-### Instalación
-```bash
-npm install
-```
+Changes made via Lovable will be committed automatically to this repo.
 
-### Desarrollo
-```bash
+**Use your preferred IDE**
+
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-Inicia el servidor de desarrollo en `http://localhost:5173`
 
-### Build
-```bash
-npm run build
-```
-Compila el proyecto para producción en `dist/`
+**Edit a file directly in GitHub**
 
-### Preview
-```bash
-npm run preview
-```
-Previsualiza la build de producción localmente
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-### Linting
-```bash
-npm run lint
-```
-Ejecuta ESLint para verificar el código
+**Use GitHub Codespaces**
 
-## 🛠️ Stack Tecnológico
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-- **React 19** - Biblioteca UI
-- **TypeScript** - Tipado estático
-- **Vite** - Build tool y dev server
-- **Tailwind CSS** - Framework CSS utility-first
-- **React Router** - Enrutamiento
-- **Axios** - Cliente HTTP
-- **ESLint** - Linter de código
+## What technologies are used for this project?
 
-## 📦 Características Implementadas
+This project is built with:
 
-### ✅ Componentes UI
-- Button con variantes (primary, secondary, danger)
-- Input con etiquetas y validación de errores
-- Card para contenedores de contenido
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-### ✅ Features
-- **Auth**: Login con autenticación básica
-- **Inventory**: CRUD de productos con tabla y formularios
-- **Movements**: Visualización de movimientos de inventario
+## How can I deploy this project?
 
-### ✅ Layouts
-- AuthLayout: Layout minimalista para autenticación
-- DashboardLayout: Layout con header, navegación y sidebar
+Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
 
-### ✅ Servicios
-- API client configurado con interceptores
-- Manejo automático de tokens de autenticación
-- Redirección en caso de 401 Unauthorized
+## Can I connect a custom domain to my Lovable project?
 
-### ✅ Context
-- AuthContext para gestión global de autenticación
+Yes, you can!
 
-### ✅ Utils
-- Formateo de fechas y monedas
-- Función debounce
-- Helper para classNames condicionales
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-## 🎨 Tailwind CSS
-
-El proyecto usa Tailwind CSS v4 con la configuración estándar. Los estilos globales están en `src/index.css`:
-
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-```
-
-## 🔧 Path Aliases
-
-El proyecto tiene configurados path aliases para imports más limpios:
-
-```typescript
-@components/*  → src/components/*
-@features/*    → src/features/*
-@layouts/*     → src/layouts/*
-@services/*    → src/services/*
-@models/*      → src/models/*
-@hooks/*       → src/hooks/*
-@utils/*       → src/utils/*
-@context/*     → src/context/*
-@router/*      → src/router/*
-```
-
-## 🌐 Variables de Entorno
-
-Copia `.env.example` a `.env` y configura las variables:
-
-```env
-VITE_API_BASE_URL=http://localhost:3000/api
-```
-
-## 📝 Próximos Pasos
-
-- [ ] Integrar con API backend real
-- [ ] Agregar tests unitarios y de integración
-- [ ] Implementar formularios de registro
-- [ ] Añadir manejo de roles y permisos
-- [ ] Implementar filtros y búsqueda avanzada
-- [ ] Agregar paginación en tablas
-- [ ] Implementar notificaciones toast
-- [ ] Añadir modo oscuro
-- [ ] Optimizar rendimiento con React.memo
-- [ ] Agregar documentación de componentes con Storybook
-
-## 👥 Contribución
-
-1. Fork el proyecto
-2. Crea una rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto es privado y está bajo la licencia de su propietario.
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
