@@ -7,7 +7,6 @@ import {
 } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { validateAuthToken } from "@/services/authMiddleware";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Usuario = Tables<"Usuarios">;
@@ -31,19 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!isMounted) return;
-
-      setSession(session);
-      setUser(session?.user ?? null);
-
-      if (session?.user) {
+    const fetchUserProfile = async (userId: string) => {
+      try {
         const { data, error } = await supabase
           .from("Usuarios")
           .select("*")
-          .eq("Id", session.user.id)
+          .eq("Id", userId)
           .single();
 
         if (isMounted) {
@@ -53,64 +45,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } else {
             setUsuario(data);
           }
-          setLoading(false);
         }
-      } else {
+      } catch (error) {
         if (isMounted) {
+          console.error("Error fetching user profile:", error);
           setUsuario(null);
+        }
+      } finally {
+        if (isMounted) {
           setLoading(false);
         }
       }
+    };
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (session?.user) {
+        // Defer the database query to avoid deadlock with Supabase auth initialization.
+        // onAuthStateChange fires during auth init; making a Supabase client call
+        // inside this callback blocks auth resolution, causing an infinite loading state.
+        setTimeout(() => {
+          fetchUserProfile(session.user.id);
+        }, 0);
+      } else {
+        setUsuario(null);
+        setLoading(false);
+      }
     });
-
-    // Verificar sesión inicial con validación del token
-    validateAuthToken()
-      .then((session) => {
-        if (!isMounted) return;
-
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          supabase
-            .from("Usuarios")
-            .select("*")
-            .eq("Id", session.user.id)
-            .single()
-            .then(({ data, error }) => {
-              if (isMounted) {
-                if (error) {
-                  console.error("Error fetching user profile:", error);
-                  setUsuario(null);
-                } else {
-                  setUsuario(data);
-                }
-                setLoading(false);
-              }
-            })
-            .catch((error) => {
-              if (isMounted) {
-                console.error("Error fetching user profile:", error);
-                setUsuario(null);
-                setLoading(false);
-              }
-            });
-        } else {
-          if (isMounted) {
-            setUsuario(null);
-            setLoading(false);
-          }
-        }
-      })
-      .catch((error) => {
-        if (isMounted) {
-          console.error("Error validating token:", error);
-          setSession(null);
-          setUser(null);
-          setUsuario(null);
-          setLoading(false);
-        }
-      });
 
     return () => {
       isMounted = false;

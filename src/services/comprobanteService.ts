@@ -14,12 +14,12 @@ export const comprobanteService = {
     async createComprobante(
         data: {
             tipoComprobanteCodigo?: string;
-            numero?: string;
             fecha?: string;
             observacion?: string;
             detalles?: Array<{
                 productoEmpresaId?: string;
                 cantidad?: number;
+                costoUnitario?: number;
                 almacenOrigenId?: string;
                 almacenDestinoId?: string;
             }>;
@@ -32,12 +32,12 @@ export const comprobanteService = {
         // Transformar datos del formulario al formato esperado por el backend
         const payload = {
             TipoComprobanteCodigo: tipoCodigoNum,
-            Numero: data.numero || "",
             Fecha: data.fecha ? new Date(data.fecha).toISOString() : new Date().toISOString(),
             Observacion: data.observacion || undefined,
             Detalles: (data.detalles || []).map((detalle) => ({
                 ProductoEmpresaId: detalle.productoEmpresaId || "",
                 Cantidad: detalle.cantidad || 0,
+                CostoUnitario: detalle.costoUnitario !== undefined ? detalle.costoUnitario : undefined,
                 AlmacenOrigenId: detalle.almacenOrigenId || undefined,
                 AlmacenDestinoId: detalle.almacenDestinoId || undefined,
             })),
@@ -188,6 +188,38 @@ export const comprobanteService = {
                     throw e;
                 }
                 throw new Error("Error al confirmar el comprobante");
+            }
+        }
+    },
+
+    /**
+     * PUT /api/Comprobantes/:id/anular
+     * Anula un comprobante (cambia estado de CONFIRMADO a ANULADO)
+     */
+    async anularComprobante(
+        id: string,
+        accessToken: string
+    ): Promise<void> {
+        const response = await fetch(`${API_URL}/api/Comprobantes/${id}/anular`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            try {
+                const errorData = JSON.parse(text);
+                throw new Error(
+                    errorData.message || "Error al anular el comprobante"
+                );
+            } catch (e) {
+                if (e instanceof Error) {
+                    throw e;
+                }
+                throw new Error("Error al anular el comprobante");
             }
         }
     },

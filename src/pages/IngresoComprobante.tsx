@@ -37,6 +37,10 @@ const detalleSchema = z
   .object({
     productoEmpresaId: z.string().min(1, "Producto es requerido"),
     cantidad: z.number().min(0.01, "Cantidad debe ser mayor a 0"),
+    costoUnitario: z
+      .number()
+      .min(0, "Costo debe ser mayor o igual a 0")
+      .optional(),
     almacenOrigenId: z.string().optional(),
     almacenDestinoId: z.string().optional(),
   })
@@ -52,7 +56,6 @@ const detalleSchema = z
 
 const comprobanteSchema = z.object({
   tipoComprobanteCodigo: z.string().min(1, "Tipo de comprobante es requerido"),
-  numero: z.string().min(1, "Número de comprobante es requerido"),
   fecha: z.string().min(1, "Fecha es requerida"),
   observacion: z.string().max(500, "Máximo 500 caracteres").optional(),
   detalles: z.array(detalleSchema).min(1, "Debe agregar al menos un detalle"),
@@ -98,10 +101,9 @@ export default function IngresoComprobante() {
     resolver: zodResolver(comprobanteSchema),
     defaultValues: {
       tipoComprobanteCodigo: "",
-      numero: "",
       fecha: today,
       observacion: "",
-      detalles: [{ productoEmpresaId: "", cantidad: 1 }],
+      detalles: [{ productoEmpresaId: "", cantidad: 1, costoUnitario: 0 }],
     },
   });
 
@@ -139,7 +141,7 @@ export default function IngresoComprobante() {
   };
 
   const agregarDetalle = () => {
-    append({ productoEmpresaId: "", cantidad: 1 });
+    append({ productoEmpresaId: "", cantidad: 1, costoUnitario: 0 });
   };
 
   const eliminarDetalle = (index: number) => {
@@ -161,6 +163,16 @@ export default function IngresoComprobante() {
     tipoCodigoNum === 20 || tipoCodigoNum === 21 || tipoCodigoNum === 40; // SALIDA o TRANSFERENCIA
   const isAlmacenDestinoObligatorio =
     tipoCodigoNum === 10 || tipoCodigoNum === 11 || tipoCodigoNum === 40; // INGRESO o TRANSFERENCIA
+
+  // Determinar si mostrar y requerir campo de costo unitario
+  const tiposQueIngresan = [10, 11, 30]; // INGRESO y AJUSTE POSITIVO
+  const tiposQueSalen = [20, 21, 31]; // SALIDA y AJUSTE NEGATIVO
+  const tipoTransferencia = 40;
+  const tipoDocumento = 90;
+
+  const isCostoVisible =
+    tiposQueIngresan.includes(tipoCodigoNum) || tipoCodigoNum === tipoDocumento;
+  const isCostoRequerido = tiposQueIngresan.includes(tipoCodigoNum);
 
   return (
     <DashboardLayout>
@@ -217,23 +229,6 @@ export default function IngresoComprobante() {
                             ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="numero"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número de Comprobante *</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ingresa el número de comprobante"
-                          {...field}
-                        />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -368,6 +363,41 @@ export default function IngresoComprobante() {
                           </FormItem>
                         )}
                       />
+
+                      {isCostoVisible && (
+                        <FormField
+                          control={form.control}
+                          name={`detalles.${index}.costoUnitario`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Costo Unitario {isCostoRequerido && "*"}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  placeholder="0.00"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      parseFloat(e.target.value) || 0,
+                                    )
+                                  }
+                                />
+                              </FormControl>
+                              {!isCostoRequerido && (
+                                <p className="text-xs text-muted-foreground">
+                                  Opcional. No afecta el c\u00e1lculo de
+                                  inventario.
+                                </p>
+                              )}
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                       {isAlmacenOrigenObligatorio && (
                         <FormField
