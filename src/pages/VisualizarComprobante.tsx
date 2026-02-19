@@ -74,6 +74,8 @@ type ComprobanteData = {
   creadoPorNombre?: string;
   creadoEn?: string;
   detalles?: ComprobanteDetalle[];
+  contraDeId?: string;
+  almacenes?: { id: string; nombre: string }[];
 };
 
 type TipoComprobante = {
@@ -202,10 +204,26 @@ export default function VisualizarComprobante() {
     totalDetalles: (comp.totalDetalles ?? comp.TotalDetalles) as number,
     creadoPorNombre: (comp.creadoPorNombre ?? comp.CreadoPorNombre) as string,
     creadoEn: (comp.creadoEn ?? comp.CreadoEn) as string,
+    contraDeId: (comp.contraDeId ?? comp.ContraDeId) as string | undefined,
+    almacenes: (comp.almacenes ?? comp.Almacenes) as
+      | { id: string; nombre: string }[]
+      | undefined,
   }));
 
+  // Ordenar por número de mayor a menor (asumiendo que el número es numérico, si no, se puede ajustar)
+  const comprobantesOrdenados = [...comprobantes].sort((a, b) => {
+    if (!a.numero) return 1;
+    if (!b.numero) return -1;
+    const numA = Number(a.numero);
+    const numB = Number(b.numero);
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return numB - numA;
+    }
+    return b.numero.localeCompare(a.numero);
+  });
+
   // Aplicar filtros
-  const comprobantesFiltrados = comprobantes.filter((comp) => {
+  const comprobantesFiltrados = comprobantesOrdenados.filter((comp) => {
     // Filtro por número
     if (
       filtroNumero &&
@@ -248,10 +266,14 @@ export default function VisualizarComprobante() {
       }
     }
 
-    // NOTA: El filtro por almacén no está implementado porque los comprobantes
-    // en el listado no incluyen información de almacén (solo en los detalles).
-    // Para implementarlo, el backend necesitaría devolver esta información
-    // en el endpoint GET /api/Comprobantes
+    // Filtro por almacén
+    if (
+      filtroAlmacen !== "todos" &&
+      (!comp.almacenes ||
+        !comp.almacenes.some((almacen) => almacen.id === filtroAlmacen))
+    ) {
+      return false;
+    }
 
     return true;
   });
@@ -291,6 +313,7 @@ export default function VisualizarComprobante() {
           almacenDestinoNombre: (det.AlmacenDestinoNombre ??
             det.almacenDestinoNombre) as string,
         })),
+        contraDeId: (data.ContraDeId ?? data.contraDeId) as string | undefined,
       };
 
       setComprobanteDetalle(mappedData);
@@ -631,8 +654,15 @@ export default function VisualizarComprobante() {
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => handleAnular(comp.id!)}
-                                disabled={anularMutation.isPending}
+                                disabled={
+                                  anularMutation.isPending || !!comp.contraDeId
+                                }
                                 className="gap-1"
+                                title={
+                                  comp.contraDeId
+                                    ? "No se puede anular un contra comprobante"
+                                    : undefined
+                                }
                               >
                                 <XCircle className="h-4 w-4" />
                                 Anular
@@ -814,8 +844,16 @@ export default function VisualizarComprobante() {
                   <Button
                     variant="destructive"
                     onClick={() => handleAnular(comprobanteDetalle.id!)}
-                    disabled={anularMutation.isPending}
+                    disabled={
+                      anularMutation.isPending ||
+                      !!comprobanteDetalle.contraDeId
+                    }
                     className="gap-2"
+                    title={
+                      comprobanteDetalle.contraDeId
+                        ? "No se puede anular un contra comprobante"
+                        : undefined
+                    }
                   >
                     {anularMutation.isPending ? (
                       <>

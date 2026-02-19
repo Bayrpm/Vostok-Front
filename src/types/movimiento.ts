@@ -1,7 +1,24 @@
-import type { Tables } from "@/integrations/supabase/types";
-
-export type MovimientoInventario = Tables<"MovimientosInventario">;
-
+// Basado en la respuesta del backend para movimientos de inventario
+// tipoMovimiento puede ser:
+// "INGRESO MANUAL", "ANULACION_INGRESO MANUAL", "TRANSFERENCIA_ENTRADA", "TRANSFERENCIA_SALIDA", "INVENTARIO INICIAL", etc.
+export type MovimientoInventario = {
+    id: string;
+    fechaMovimiento: string;
+    tipoMovimiento: string;
+    direccion: string;
+    direccionNombre: string;
+    cantidad: number;
+    costoUnitario: number | null;
+    valorTotal: number;
+    documentoReferencia: string | null;
+    documentoTipo: string | null;
+    motivo: string | null;
+    productoNombre: string;
+    sku: string;
+    almacenNombre: string;
+    usuarioNombre: string;
+    fechaCreacion: string;
+};
 export type CreateMovimientoInventarioPayload = {
     EmpresaId: string;
     ProductoEmpresaId: string;

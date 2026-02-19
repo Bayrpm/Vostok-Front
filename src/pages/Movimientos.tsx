@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { movimientosService } from "@/services/movimientosService";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,49 +28,48 @@ import {
   RefreshCw,
   ArrowRightLeft,
 } from "lucide-react";
+import { movimientosService } from "@/services/movimientosService";
 import type { MovimientoInventario } from "@/types/movimiento";
+import { Loader } from "@/components/common/Loader";
 
 export default function Movimientos() {
-  const { usuario } = useAuth();
+  const { session } = useAuth();
   const [search, setSearch] = useState("");
   const [tipoFilter, setTipoFilter] = useState<string>("all");
 
-  const { data: movimientos, isLoading } = useQuery({
+  const { data: movimientos, isLoading } = useQuery<MovimientoInventario[]>({
     queryKey: ["movimientos"],
     queryFn: async () => {
-      if (!usuario?.EmpresaId) return [];
-      return await movimientosService.getMovimientos(usuario.EmpresaId);
+      return await movimientosService.getMovimientos(session?.access_token);
     },
+    initialData: [],
   });
 
-  const { data: tiposMovimiento } = useQuery({
-    queryKey: ["tipos-movimiento"],
-    queryFn: async () => {
-      return await movimientosService.getTiposMovimiento();
-    },
-  });
+  // Extraer tipos de movimiento únicos del listado
+  const tiposMovimiento = Array.from(
+    new Set(movimientos?.map((m) => m.tipoMovimiento)),
+  ).map((tipo) => ({
+    codigo: tipo,
+    nombre: tipo,
+  }));
 
-  const getMovementIcon = (tipo: number) => {
+  const getMovementIcon = (tipo: string) => {
     switch (tipo) {
-      case 1:
+      case "INGRESO_COMPRA":
         return <TrendingUp className="h-4 w-4 text-stock-healthy" />;
-      case 2:
+      case "SALIDA_VENTA":
         return <TrendingDown className="h-4 w-4 text-stock-danger" />;
-      case 3:
-        return <RefreshCw className="h-4 w-4 text-stock-warning" />;
       default:
         return <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
-  const getMovementColor = (tipo: number) => {
+  const getMovementColor = (tipo: string) => {
     switch (tipo) {
-      case 1:
+      case "INGRESO_COMPRA":
         return "bg-stock-healthy/10 text-stock-healthy border-stock-healthy";
-      case 2:
+      case "SALIDA_VENTA":
         return "bg-stock-danger/10 text-stock-danger border-stock-danger";
-      case 3:
-        return "bg-stock-warning/10 text-stock-warning border-stock-warning";
       default:
         return "bg-muted text-muted-foreground border-muted-foreground";
     }
@@ -79,15 +77,10 @@ export default function Movimientos() {
 
   const filteredMovimientos = movimientos?.filter((m) => {
     const matchesSearch =
-      (m as any).ProductoEmpresa?.Producto?.Nombre?.toLowerCase().includes(
-        search.toLowerCase(),
-      ) ||
-      (m as any).ProductoEmpresa?.SKU?.toLowerCase().includes(
-        search.toLowerCase(),
-      ) ||
-      m.Motivo?.toLowerCase().includes(search.toLowerCase());
-    const matchesTipo =
-      tipoFilter === "all" || parseInt(tipoFilter) === m.TipoMovimiento;
+      m.productoNombre?.toLowerCase().includes(search.toLowerCase()) ||
+      m.sku?.toLowerCase().includes(search.toLowerCase()) ||
+      (m.motivo || "").toLowerCase().includes(search.toLowerCase());
+    const matchesTipo = tipoFilter === "all" || tipoFilter === m.tipoMovimiento;
     return matchesSearch && matchesTipo;
   });
 
@@ -116,8 +109,8 @@ export default function Movimientos() {
                   <SelectContent>
                     <SelectItem value="all">Todos los tipos</SelectItem>
                     {tiposMovimiento?.map((tipo) => (
-                      <SelectItem key={tipo.Id} value={tipo.Codigo.toString()}>
-                        {tipo.Nombre}
+                      <SelectItem key={tipo.codigo} value={tipo.codigo}>
+                        {tipo.nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -151,15 +144,15 @@ export default function Movimientos() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
-                        Cargando...
+                      <TableCell colSpan={7} className="text-center py-12">
+                        <Loader size="md" message="Cargando movimientos..." />
                       </TableCell>
                     </TableRow>
                   ) : filteredMovimientos && filteredMovimientos.length > 0 ? (
                     filteredMovimientos.map((mov) => (
-                      <TableRow key={mov.Id}>
+                      <TableRow key={mov.id}>
                         <TableCell className="whitespace-nowrap">
-                          {new Date(mov.FechaMovimiento).toLocaleString(
+                          {new Date(mov.fechaMovimiento).toLocaleString(
                             "es-CL",
                             {
                               dateStyle: "short",
@@ -170,54 +163,49 @@ export default function Movimientos() {
                         <TableCell>
                           <Badge
                             variant="outline"
-                            className={`flex items-center gap-1.5 w-fit ${getMovementColor(mov.TipoMovimiento)}`}
+                            className={`flex items-center gap-1.5 w-fit ${getMovementColor(mov.tipoMovimiento)}`}
                           >
-                            {getMovementIcon(mov.TipoMovimiento)}
-                            {mov.TipoMovimiento}
+                            {getMovementIcon(mov.tipoMovimiento)}
+                            {mov.tipoMovimiento}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <div>
-                            <p className="font-medium">
-                              {(mov as any).ProductoEmpresa?.Producto?.Nombre}
-                            </p>
+                            <p className="font-medium">{mov.productoNombre}</p>
                             <p className="text-xs text-muted-foreground font-mono">
-                              {(mov as any).ProductoEmpresa?.SKU}
+                              {mov.sku}
                             </p>
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-semibold">
                           <span
                             className={
-                              mov.Direccion === "E"
+                              mov.direccion === "E"
                                 ? "text-stock-healthy"
-                                : mov.Direccion === "S"
+                                : mov.direccion === "S"
                                   ? "text-stock-danger"
                                   : ""
                             }
                           >
-                            {mov.Direccion === "E"
+                            {mov.direccion === "E"
                               ? "+"
-                              : mov.Direccion === "S"
+                              : mov.direccion === "S"
                                 ? "-"
                                 : ""}
-                            {mov.Cantidad}
+                            {mov.cantidad}
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
                           $
-                          {mov.CostoUnitario?.toLocaleString("es-CL") || "0.00"}
+                          {mov.costoUnitario?.toLocaleString("es-CL") || "0.00"}
                         </TableCell>
                         <TableCell
                           className="max-w-[200px] truncate"
-                          title={mov.Motivo || ""}
+                          title={mov.motivo || ""}
                         >
-                          {mov.Motivo}
+                          {mov.motivo}
                         </TableCell>
-                        <TableCell>
-                          {(mov as any).Usuarios?.Nombres}{" "}
-                          {(mov as any).Usuarios?.ApellidoPaterno}
-                        </TableCell>
+                        <TableCell>{mov.usuarioNombre}</TableCell>
                       </TableRow>
                     ))
                   ) : (
